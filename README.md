@@ -1,3 +1,7 @@
+---
+description: Home
+---
+
 # Welcome to DXEZ Platform
 
 Digital Transformation can be made easy only by good Biz-Dev-Ops' experiences
