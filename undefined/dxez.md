@@ -569,7 +569,7 @@ $ ingress  annotations 설정 변경 (http 413 error) # 용량 제한
 \
 
 
-### 1.4. GidPod 설치
+### 1.4. GitPod 설치
 
 2020년에 출시되었으며, '즉시 개발 가능한' 환경을 자동화하는 오픈소스 플랫폼
 
@@ -669,3 +669,7 @@ gitlab.handymes.com
 ```bash
 kubectl kots admin-console --namespace gitpod
 ```
+
+### 1.4. MSAez 설치
+
+\[]
