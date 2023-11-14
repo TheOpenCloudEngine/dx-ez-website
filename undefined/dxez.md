@@ -1,12 +1,12 @@
 # DXez 설치
 
-### 2.1. Prerequisite
+### 1.1. Prerequisite
 
 * CPU는 18core, memory는 128G, 1gb network, Disk(sas 또는 ssd)는 2TB 이상의 spec을 가진 baremetal 장비
 * cli로 접근 가능한 dns에 domain (amazon, cloudflare 등)
 * IaaS설치를 위한 proxmox 설치 image를 download 하고 usb 도는 cd로 설치 가능한 disk를 만든다. (https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso)
 
-### 2.2. 가상화 구성을 위한 proxmox 설치
+### 1.2. 가상화 구성을 위한 proxmox 설치
 
 * 일반 linux 설치 절차와 유사하며 자세한 설치는 https://www.linuxtechi.com/install-proxmox-ve-on-bare-metal/ 를 참조한다.
 * Table of Contents
@@ -47,7 +47,7 @@ $ sudo systemctl restart pveproxy.service
 \
 
 
-### 2.3. kubernetes vm template 생성 및 설치
+### 1.3. kubernetes vm template 생성 및 설치
 
 * 본 예에서는 ubuntu 22.04 를 base로 표준 image를 생성
 * ubuntu image repo: https://cloud-images.ubuntu.com/
@@ -74,7 +74,7 @@ proxmox web gui에서 방금 생성한 disk edit > add
 900 > options > Boot Order scsi0 disk 1번 또는 2번으로 변경후 start
 ```
 
-#### 2.3.1 vm 필수 package 설치
+#### 1.3.1 vm 필수 package 설치
 
 * ubuntu os daemon 관리 popup 창 제거
 
@@ -170,7 +170,7 @@ $ sudo mv kk /usr/local/bin
 $ sudo echo "" > /etc/machine-id
 ```
 
-#### 2.3.2 kubernetes cluster 설정 전 vm 요구 사항
+#### 1.3.2 kubernetes cluster 설정 전 vm 요구 사항
 
 * vm은 master, worker (node1, node2, node3) 3개로 구성한다.
 
@@ -249,7 +249,7 @@ vi config.toml
 systemctl restart containerd
 ```
 
-#### 2.3.3 install kubernetes cluster with kubekey
+#### 1.3.3 install kubernetes cluster with kubekey
 
 * kubekey kubernetes cluster 생성을 위한 config 설정 (master node root 사용자)
 
@@ -346,7 +346,7 @@ http://218.236.22.60:30880
 password 변경
 ```
 
-#### 2.3.4 kubernetes 주요 echo system 설치
+#### 1.3.4 kubernetes 주요 echo system 설치
 
 * openebs 설치 (CSI)
 
@@ -569,7 +569,7 @@ $ ingress  annotations 설정 변경 (http 413 error) # 용량 제한
 \
 
 
-### 2.4. GidPod 설치
+### 1.4. GidPod 설치
 
 2020년에 출시되었으며, '즉시 개발 가능한' 환경을 자동화하는 오픈소스 플랫폼
 
