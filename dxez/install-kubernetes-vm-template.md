@@ -1,53 +1,6 @@
-# DXez 설치
+# Install Kubernetes VM Template
 
-### 1.1. Prerequisite
-
-* CPU는 18core, memory는 128G, 1gb network, Disk(sas 또는 ssd)는 2TB 이상의 spec을 가진 baremetal 장비
-* cli로 접근 가능한 dns에 domain (amazon, cloudflare 등)
-* IaaS설치를 위한 proxmox 설치 image를 download 하고 usb 도는 cd로 설치 가능한 disk를 만든다. (https://www.proxmox.com/en/downloads/proxmox-virtual-environment/iso)
-
-### 1.2. 가상화 구성을 위한 proxmox 설치
-
-* 일반 linux 설치 절차와 유사하며 자세한 설치는 https://www.linuxtechi.com/install-proxmox-ve-on-bare-metal/ 를 참조한다.
-* Table of Contents
-
-```
-   Prerequisites
-1) Download Proxmox VE ISO Installer
-2) Boot from the Proxmox VE Installer
-3) Accept End User License Agreement
-4) Choose Installation Target Disk
-5) Set Location and Time Zone
-6) Create Admin Password and Email Address
-7) Network Configuration
-8) Begin Proxmox VE Installation
-9) Access the Proxmox VE Web Interface
-10) Change Proxmox Enterprise Repository to Community
-```
-
-* proxmox 서버에 TLS 설정 (도메인 이름이 handymes.com 일경우)
-
-```bash
-$ git clone  https://github.com/acmesh-official/acme.sh.git acme.sh-master
-$ cd acme.sh-master/
-$ sudo ./acme.sh --register-account -m zasmin@uengine.net
-$ sudo ./acme.sh --issue --standalone --keypath /etc/pve/local/pve-ssl.key --server letsencrypt --fullchainpath /etc/pve/local/pve-ssl.pem --reloadcmd "systemctl restart pveproxy" -d proxmox3.handymes.com
-```
-
-* proxmox public licenses 관련 팝업 제거
-
-```bash
-$ cd /usr/share/javascript/proxmox-widget-toolkit/
-$ cp proxmoxlib.js proxmoxlib.js.bak
-$ vi proxmoxlib.js
-    Ext.Msg.show({      ----->     void ({ // Ext.Msg.show({
-$ sudo systemctl restart pveproxy.service
-```
-
-\
-
-
-### 1.3. kubernetes vm template 생성 및 설치
+### kubernetes vm template 생성 및 설치
 
 * 본 예에서는 ubuntu 22.04 를 base로 표준 image를 생성
 * ubuntu image repo: https://cloud-images.ubuntu.com/
@@ -74,7 +27,7 @@ proxmox web gui에서 방금 생성한 disk edit > add
 900 > options > Boot Order scsi0 disk 1번 또는 2번으로 변경후 start
 ```
 
-#### 1.3.1 vm 필수 package 설치
+#### vm 필수 package 설치
 
 * ubuntu os daemon 관리 popup 창 제거
 
@@ -170,7 +123,7 @@ $ sudo mv kk /usr/local/bin
 $ sudo echo "" > /etc/machine-id
 ```
 
-#### 1.3.2 kubernetes cluster 설정 전 vm 요구 사항
+#### kubernetes cluster 설정 전 vm 요구 사항
 
 * vm은 master, worker (node1, node2, node3) 3개로 구성한다.
 
@@ -249,7 +202,7 @@ vi config.toml
 systemctl restart containerd
 ```
 
-#### 1.3.3 install kubernetes cluster with kubekey
+#### install kubernetes cluster with kubekey
 
 * kubekey kubernetes cluster 생성을 위한 config 설정 (master node root 사용자)
 
@@ -346,7 +299,7 @@ http://218.236.22.60:30880
 password 변경
 ```
 
-#### 1.3.4 kubernetes 주요 echo system 설치
+#### kubernetes 주요 echo system 설치
 
 * openebs 설치 (CSI)
 
@@ -565,160 +518,3 @@ $ ingress  annotations 설정 변경 (http 413 error) # 용량 제한
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.org/client-max-body-size: "0"
 ```
-
-\
-
-
-### 1.4. GitPod 설치
-
-2020년에 출시되었으며, '즉시 개발 가능한' 환경을 자동화하는 오픈소스 플랫폼
-
-* 설치 문서
-
-```
-1. https://www.gitpod.io/docs/configure/self-hosted/helm-deprecated/installation/on-kubernetes
-2. https://www.gitpod.io/docs/configure/self-hosted/latest/installing-gitpod
-```
-
-* 설치 환경 요구사항
-
-```
-- linux kernel > 5.4
-- ubuntu 20.04 and 22.04
-- kubernetes version 1.23.10
-- orchestration Platform : k3s
-- containerd 1.5 and 1.6
-- cni: calico vxlan
-- cert-manager > 1.5
-- database : mysql
-- image repository : minio aws s3
-- At least 4 vCPU and 16GB of RAM
-- Load Balancer
-- k8s cluster (do not use docker)
-```
-
-* 사전 준비 작업 (내부 pod를 dns를 통해 호출 )
-
-> coredns 설정 변경
-
-```bash
-$ kubectl -n kube-system edit cm coredns # ready 와 kubernetes cluster.local 사이
-```
-
-```yaml
-apiVersion: v1
-data:
-  Corefile: |
-    .:53 {
-        errors
-        health {
-           lameduck 5s
-        }
-        ready
-        rewrite stop {
-           name regex registry.gitpod.handymes.com proxy.gitpod.svc.cluster.local
-           answer name prox.gitpod.svc.cluster.local registry.gitpod.handymes.com
-        }
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-           pods insecure
-           fallthrough in-addr.arpa ip6.arpa
-           ttl 30
-        }
-        prometheus :9153
-        forward . /etc/resolv.conf {
-           max_concurrent 1000
-        }
-        cache 30
-        loop
-        reload
-        loadbalance
-    }
-kind: ConfigMap
-metadata:
-  name: coredns
-  namespace: kube-system
-```
-
-> node label (모든 worker node)
-
-```bash
-$ kubectl label node node1 gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true
-$ kubectl label node node2 gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true
-$ kubectl label node node3 gitpod.io/workload_meta=true gitpod.io/workload_ide=true gitpod.io/workload_workspace_services=true gitpod.io/workload_workspace_regular=true gitpod.io/workload_workspace_headless=true
-```
-
-> gitpod 설치도구 kots 설치 (root 사용자)
-
-```bash
-sudo -i
-curl https://kots.io/install | bash
-kubectl kots install gitpod
-```
-
-> dns 서버에 아래sodyd A record로 등록 (gitpod proxy loadbalancer IP)
-
-```
-gitlab.handymes.com
-@.gitpod.handymes.com
-*.gitpod.handymes.com
-*.ws.gitpod.handymes.co
-```
-
-> gitpod 설정 콘솔
-
-```bash
-kubectl kots admin-console --namespace gitpod
-```
-
-### 1.4. MSAez 설치
-
-* 설치 전, 설치 된 GitLab에 Application 등록하여, OAuth ID와 Secrets 발급이 필요하다.
-
-#### 1.4.1 GitLab Application 등록
-
-1. 설치된 Gitlab의 Admin 계정으로 접속
-2.  Admin Area -> Applications\
-
-
-    <figure><img src="../.gitbook/assets/Pasted image 20231110122240 (1).png" alt=""><figcaption><p>GitLab Application</p></figcaption></figure>
-
-
-3. **Add New application Click**
-4.  Application 설정\
-
-
-    <figure><img src="../.gitbook/assets/Pasted image 20231110122407.png" alt=""><figcaption><p>Application 설정 화면</p></figcaption></figure>
-
-
-5. Application 등록 후, 발급된 ID, Secret은 MSAez Install에 사용되므로, 저장.
-
-#### 1.4.2 MSAez 설치
-
-1. MSAez 설치는 \[MSAez SourceCode]\([https://github.com/msa-ez/platform](https://github.com/msa-ez/platform)) 해당 소스코드 내부의 on-prem-helm 폴더에서 진행된다.
-
-```bash
-$ git clone https://github.com/msa-ez/platform.git
-
-```
-
-> ./on-prem-helm/values.yaml
->
-> ```yaml
-> # /on-prem-helm/values.yaml
-> replicaCount: 1
-> image:
->   repository: asia-northeast3-docker.pkg.dev/eventstorming-tool/eventstorming # Image Registry URL
->   eventstorming: evenstorming:v49 # Eventstorming-tool Image URL
->   acebase: acebase:v33 # Acebase Image URL
->
-> gitlab: 
-> 	url: gitlab.handymes.com # Gitlab URL
-> 	oauth: 
-> 		id: # Gitlab Application OAUTH ID
-> 		secret: # Gitlab Application OAUTH Secrets
->
-> db:
->   host: acebase.handymes.com # DB URL
->   port: 443
->   name: mydb
-> ```

@@ -4,7 +4,7 @@ description: Digital Transformation can be made easy only by good Biz-Dev-Ops' e
 
 # Welcome to DXEZ Platform
 
-<figure><img src=".gitbook/assets/KakaoTalk_Image_2023-11-01-13-30-54.png" alt=""><figcaption><p>Overview of DXEZ Platform</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption><p>Overview of DXez</p></figcaption></figure>
 
 ### Features and Scenarios:
 
