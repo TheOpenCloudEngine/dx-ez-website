@@ -1,6 +1,6 @@
-# 테스트
+# 실행
 
-## # Model
+## # Example Model
 
 * [https://msa.handymes.com/#/storming/shop-sh](https://msa.handymes.com/#/storming/shop-sh)\
 
