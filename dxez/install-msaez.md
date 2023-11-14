@@ -28,8 +28,10 @@
 $ git clone https://github.com/msa-ez/platform.git
 ```
 
-> ./on-prem-helm/values.yaml
->
+***
+
+2. Helm chart Value 수정.
+
 > ```yaml
 > # /on-prem-helm/values.yaml
 > replicaCount: 1
@@ -46,6 +48,37 @@ $ git clone https://github.com/msa-ez/platform.git
 >
 > db:
 >   host: acebase.handymes.com # DB URL
->   port: 443
->   name: mydb
+>   port: 443 # 고정
+>   name: mydb # 고정
 > ```
+
+3. Helm install
+
+```bash
+$ cd on-prem-helm
+$ helm install msaez .
+```
+
+4. 서비스 확인
+
+```bash
+# Pod, Service
+root@theia-build:/home/kimsanghoon# kubectl get all
+NAME                                     READY   STATUS    RESTARTS   AGE
+pod/acebase-6c7c8598fd-6fgkp             1/1     Running   0          9d
+pod/eventstorming-tool-8554ffc55-h94vd   1/1     Running   0          23h
+
+NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/acebase              ClusterIP   10.233.15.103   <none>        80/TCP    21d
+service/eventstorming-tool   ClusterIP   10.233.19.127   <none>        80/TCP    21d
+
+```
+
+```bash
+# Ingress
+root@theia-build:/home/kimsanghoon# kubectl get ing
+NAME                     CLASS   HOSTS                  ADDRESS           PORTS     AGE
+acebase                  nginx   acebase.handymes.com   000.000.000.000   80, 443   21d
+eventstorming-tool-ing   nginx   msa.handymes.com       000.000.000.000   80, 443   21d
+
+```
