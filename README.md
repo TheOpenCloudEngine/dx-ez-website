@@ -1,5 +1,5 @@
 ---
-description: Digital Transformation can be made easy only by good Biz-Dev-Ops' experiences
+description: Digital Transformation made easy by good Developer eXperiences
 ---
 
 # Welcome to DXEZ Platform
